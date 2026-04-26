@@ -2,13 +2,22 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Usamos la variable de entorno para mayor seguridad
+const openai = new OpenAI({ 
+    apiKey: process.env.OPENAI_API_KEY 
+});
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-extensions',
+            '--single-process'
+        ]
     }
 });
 
@@ -17,7 +26,9 @@ client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
 });
 
-client.on('ready', () => { console.log('¡BOT ACTIVO!'); });
+client.on('ready', () => {
+    console.log('¡BOT ACTIVO EN RENDER!');
+});
 
 client.on('message', async (msg) => {
     if (msg.body.startsWith('/ia ')) {
@@ -27,7 +38,10 @@ client.on('message', async (msg) => {
                 messages: [{ role: "user", content: msg.body.slice(4) }],
             });
             msg.reply(completion.choices[0].message.content);
-        } catch (e) { msg.reply('Error de conexión.'); }
+        } catch (e) {
+            console.log('Error OpenAI:', e);
+            msg.reply('Error de conexión con la IA.');
+        }
     }
 });
 
