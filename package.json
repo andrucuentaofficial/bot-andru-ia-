@@ -1,0 +1,15 @@
+{
+  "name": "bot-andru-ia",
+  "version": "1.0.0",
+  "description": "Bot de IA 24/7",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0",
+    "openai": "^4.0.0",
+    "puppeteer": "^21.0.0"
+  }
+}
