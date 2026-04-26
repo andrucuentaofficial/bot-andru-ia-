@@ -2,7 +2,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { OpenAI } = require('openai');
 
-// Usamos la variable de entorno para mayor seguridad
+// Configuración de la IA
 const openai = new OpenAI({ 
     apiKey: process.env.OPENAI_API_KEY 
 });
@@ -17,19 +17,25 @@ const client = new Client({
             '--disable-dev-shm-usage',
             '--disable-extensions',
             '--single-process'
-        ]
+        ],
+        // Esto ayuda a que Render encuentre el Chrome instalado por Puppeteer
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null 
     }
 });
 
+// Generar QR en consola
 client.on('qr', (qr) => {
+    console.log('-------------------------------------------');
     console.log('¡ESCANEAME ANDRU!:');
     qrcode.generate(qr, { small: true });
+    console.log('-------------------------------------------');
 });
 
 client.on('ready', () => {
-    console.log('¡BOT ACTIVO EN RENDER!');
+    console.log('¡BOT ACTIVO Y CONECTADO!');
 });
 
+// Lógica del Bot con IA
 client.on('message', async (msg) => {
     if (msg.body.startsWith('/ia ')) {
         try {
@@ -39,7 +45,7 @@ client.on('message', async (msg) => {
             });
             msg.reply(completion.choices[0].message.content);
         } catch (e) {
-            console.log('Error OpenAI:', e);
+            console.error('Error en OpenAI:', e);
             msg.reply('Error de conexión con la IA.');
         }
     }
