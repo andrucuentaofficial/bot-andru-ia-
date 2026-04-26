@@ -3,7 +3,7 @@ const qrcode = require('qrcode-terminal');
 const { OpenAI } = require('openai');
 const puppeteer = require('puppeteer');
 
-// Configuración de la IA con tu llave de entorno
+// Configuración de la IA
 const openai = new OpenAI({ 
     apiKey: process.env.OPENAI_API_KEY 
 });
@@ -12,7 +12,6 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        // Argumentos de optimización para servidores gratuitos como Render
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
@@ -20,12 +19,12 @@ const client = new Client({
             '--disable-extensions',
             '--single-process'
         ],
-        // Esto hace que el bot encuentre el Chrome de Render automáticamente
-        executablePath: puppeteer.executablePath()
+        // Esta ruta es la que solucionará el error de tus logs
+        executablePath: '/opt/render/project/src/.cache/puppeteer/chrome/linux-121.0.6167.85/chrome-linux64/chrome'
     }
 });
 
-// Mostrar el código QR en los Logs de Render
+// Generar QR en consola para escanear
 client.on('qr', (qr) => {
     console.log('-------------------------------------------');
     console.log('¡ESCANEAME ANDRU! (QR GENERADO):');
@@ -37,7 +36,7 @@ client.on('ready', () => {
     console.log('¡BOT ACTIVO Y CONECTADO EXITOSAMENTE!');
 });
 
-// Responder a mensajes que empiecen con /ia
+// Lógica del Bot con IA
 client.on('message', async (msg) => {
     if (msg.body.startsWith('/ia ')) {
         try {
@@ -48,7 +47,7 @@ client.on('message', async (msg) => {
             msg.reply(completion.choices[0].message.content);
         } catch (e) {
             console.error('Error en OpenAI:', e);
-            msg.reply('Melón, hubo un error con la IA. Revisá los logs.');
+            msg.reply('Melón, hubo un error con la IA.');
         }
     }
 });
