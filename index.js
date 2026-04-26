@@ -1,8 +1,9 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { OpenAI } = require('openai');
+const puppeteer = require('puppeteer');
 
-// Configuración de la IA
+// Configuración de la IA con tu llave de entorno
 const openai = new OpenAI({ 
     apiKey: process.env.OPENAI_API_KEY 
 });
@@ -11,6 +12,7 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
+        // Argumentos de optimización para servidores gratuitos como Render
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
@@ -18,24 +20,24 @@ const client = new Client({
             '--disable-extensions',
             '--single-process'
         ],
-        // Esto ayuda a que Render encuentre el Chrome instalado por Puppeteer
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null 
+        // Esto hace que el bot encuentre el Chrome de Render automáticamente
+        executablePath: puppeteer.executablePath()
     }
 });
 
-// Generar QR en consola
+// Mostrar el código QR en los Logs de Render
 client.on('qr', (qr) => {
     console.log('-------------------------------------------');
-    console.log('¡ESCANEAME ANDRU!:');
+    console.log('¡ESCANEAME ANDRU! (QR GENERADO):');
     qrcode.generate(qr, { small: true });
     console.log('-------------------------------------------');
 });
 
 client.on('ready', () => {
-    console.log('¡BOT ACTIVO Y CONECTADO!');
+    console.log('¡BOT ACTIVO Y CONECTADO EXITOSAMENTE!');
 });
 
-// Lógica del Bot con IA
+// Responder a mensajes que empiecen con /ia
 client.on('message', async (msg) => {
     if (msg.body.startsWith('/ia ')) {
         try {
@@ -46,7 +48,7 @@ client.on('message', async (msg) => {
             msg.reply(completion.choices[0].message.content);
         } catch (e) {
             console.error('Error en OpenAI:', e);
-            msg.reply('Error de conexión con la IA.');
+            msg.reply('Melón, hubo un error con la IA. Revisá los logs.');
         }
     }
 });
